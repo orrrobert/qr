@@ -13,6 +13,7 @@
       --primary-dark: #0056b3;
       --radius: 12px;
     }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -20,10 +21,12 @@
       background: #f6f6f6;
       text-align: center;
     }
+
     h1 {
       font-size: 1.6rem;
       margin-bottom: 20px;
     }
+
     .card {
       background: white;
       padding: 20px;
@@ -32,12 +35,15 @@
       margin: auto;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     label {
       display: block;
       font-size: 1.1rem;
       margin: 12px 0 6px;
     }
-    input {
+
+    input[type="text"],
+    input[type="email"] {
       width: 100%;
       padding: 14px;
       font-size: 1.1rem;
@@ -45,16 +51,19 @@
       border-radius: var(--radius);
       box-sizing: border-box;
     }
+
     .checkbox-row {
       display: flex;
       align-items: center;
       margin-top: 12px;
     }
+
     .checkbox-row input {
-      width: auto;
-      transform: scale(1.4);
+      width: 20px;
+      height: 20px;
       margin-right: 12px;
     }
+
     button {
       width: 100%;
       margin-top: 20px;
@@ -67,16 +76,38 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button:hover { background: var(--primary-dark); }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
 
     #resultSection {
       margin-top: 30px;
       display: none;
     }
+
     #qrcode {
       margin-top: 20px;
       display: flex;
       justify-content: center;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin: 18px 0;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+      .card {
+        padding: 16px;
+      }
+      button {
+        padding: 16px;
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
@@ -97,7 +128,7 @@
 
       <div class="checkbox-row">
         <input type="checkbox" id="marketingOptIn" checked>
-        <label for="marketingOptIn">Receive marketing emails</label>
+        <label for="marketingOptIn">Yes, keep me updated about seasonal updates and special offers.</label>
       </div>
 
       <button type="submit">Generate QR Code</button>
@@ -111,22 +142,10 @@
 
   <script>
     function mungeEmail(email) {
-  email = email.toLowerCase().trim();
-  email = email.split("@").join("2");   // @ → 2
-  email = email.split(".").join("~");   // . → ~
-  return email;
-}
-
-
-    function makeTimestamp() {
-      const d = new Date();
-      const pad = n => n.toString().padStart(2, "0");
-      return d.getFullYear().toString() +
-             pad(d.getMonth()+1) +
-             pad(d.getDate()) +
-             pad(d.getHours()) +
-             pad(d.getMinutes()) +
-             pad(d.getSeconds());
+      email = email.toLowerCase().trim();
+      email = email.split("@").join("2");   // @ → 2
+      email = email.split(".").join("~");   // . → ~
+      return email;
     }
 
     document.getElementById("qrForm").addEventListener("submit", function(e) {
@@ -141,7 +160,8 @@
 
       const qrData = `${first}|${last}|${email}|${marketing}`;
 
-      document.getElementById("qrcode").innerHTML = "";
+      document.getElementById("qrcode").innerHTML = ""; // Clear previous QR
+
       new QRCode(document.getElementById("qrcode"), {
         text: qrData,
         width: 220,
