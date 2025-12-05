@@ -111,11 +111,12 @@
 
   <script>
     function mungeEmail(email) {
-      email = email.toLowerCase().trim();
-      email = email.replace("@", "_");
-      email = email.replace(/\./g, "~");
-      return email;
-    }
+  email = email.toLowerCase().trim();
+  email = email.split("@").join("2");   // @ → 2
+  email = email.split(".").join("~");   // . → ~
+  return email;
+}
+
 
     function makeTimestamp() {
       const d = new Date();
