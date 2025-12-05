@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>QR Code Generator</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #007BFF;
+      --primary-dark: #0056b3;
+      --bg: #f6f6f6;
+      --card-bg: white;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--bg);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--radius);
+      max-width: 420px;
+      margin: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    form label {
+      display: block;
+      font-size: 1.1rem;
+      margin: 12px 0 6px;
+    }
+
+    form input {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      box-sizing: border-box;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .checkbox-row input {
+      width: auto;
+      transform: scale(1.4);
+      margin-right: 12px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 18px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    #resultSection {
+      margin-top: 30px;
+      display: none;
+    }
+
+    #qrcode {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin: 18px 0;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+      .card {
+        padding: 16px;
+      }
+      form input {
+        padding: 12px;
+      }
+      button {
+        padding: 16px;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>QR Code Generator</h1>
+
+  <div class="card">
+    <form id="qrForm">
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" required autocomplete="given-name">
+
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" required autocomplete="family-name">
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required autocomplete="email">
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="marketingOptIn" checked>
+        <label for="marketingOptIn">Receive marketing emails</label>
+      </div>
+
+      <button type="submit">Generate QR Code</button>
+    </form>
+  </div>
+
+  <div id="resultSection">
+    <div id="qrcode"></div>
+    <p>Please show this code to the photographer right before your photo session.</p>
+  </div>
+
+  <script>
+    const form = document.getElementById("qrForm");
+    const resultSection = document.getElementById("resultSection");
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName  = document.getElementById("lastName").value.trim();
+      const email     = document.getElementById("email").value.trim();
+      const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
+
+      const qrData = `${firstName}|${lastName}|${email}|${marketing}`;
+
+      document.getElementById("qrcode").innerHTML = ""; // clear old QR
+
+      new QRCode(document.getElementById("qrcode"), {
+        text: qrData,
+        width: 220,
+        height: 220,
+      });
+
+      resultSection.style.display = "block";
+      resultSection.scrollIntoView({ behavior: "smooth" });
+    });
+  </script>
+
+</body>
+</html>
+
