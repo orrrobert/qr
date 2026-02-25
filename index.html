@@ -68,6 +68,15 @@
       height: 22px;
       margin-right: 12px;
       flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      font-weight: normal;
+      cursor: pointer;
     }
 
     button {
@@ -146,7 +155,7 @@
 
       <div class="checkbox-row">
         <input type="checkbox" id="marketingOptIn" checked>
-        <label for="marketingOptIn">I would like to receive my photos and seasonal event updates.</label>
+        <label for="marketingOptIn">Keep me updated about seasonal events and special offers.</label>
       </div>
 
       <button type="submit">Generate Check-in Code</button>
@@ -173,6 +182,7 @@
       const email = document.getElementById("email").value.trim().toLowerCase();
       const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
 
+      // Control characters for the scanner
       const SOH = String.fromCharCode(1); 
       const EOT = String.fromCharCode(4); 
       
@@ -190,11 +200,8 @@
           correctLevel : QRCode.CorrectLevel.M
         });
 
-        // Update the display text under the QR
         document.getElementById("clientDisplay").innerText = first + " " + last;
         document.getElementById("emailDisplay").innerText = email;
-        
-        // Update the hidden debug info
         document.getElementById("debugOut").innerText = "Raw: " + qrData.replace(SOH, '[SOH]').replace(EOT, '[EOT]');
         
         document.getElementById("resultSection").style.display = "block";
