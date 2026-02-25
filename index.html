@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Photo QR Generator</title>
+  <title>Photo Event Check-in</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     :root {
-      --primary: #d42426; /* Santa Red */
-      --primary-dark: #a31b1d;
+      --primary: #2c3e50; 
+      --primary-dark: #1a252f;
       --radius: 12px;
     }
 
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #f6f6f6;
+      background: #f0f2f5;
       text-align: center;
     }
 
@@ -30,18 +30,20 @@
 
     .card {
       background: white;
-      padding: 20px;
+      padding: 24px;
       border-radius: var(--radius);
       max-width: 420px;
       margin: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     label {
       display: block;
-      font-size: 1.1rem;
+      font-size: 1rem;
       margin: 12px 0 6px;
       text-align: left;
+      font-weight: 600;
+      color: #444;
     }
 
     input[type="text"],
@@ -49,29 +51,37 @@
       width: 100%;
       padding: 14px;
       font-size: 1.1rem;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       border-radius: var(--radius);
       box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
     }
 
     .checkbox-row {
       display: flex;
-      align-items: center;
-      margin-top: 15px;
+      align-items: flex-start;
+      margin-top: 18px;
       text-align: left;
     }
 
     .checkbox-row input {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       margin-right: 12px;
+      margin-top: 2px;
       flex-shrink: 0;
     }
 
     .checkbox-row label {
       margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.2;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      font-weight: normal;
     }
 
     button {
@@ -94,16 +104,15 @@
     #resultSection {
       margin-top: 30px;
       display: none;
-      padding-bottom: 50px;
+      padding-bottom: 60px;
     }
 
     #qrcode {
       margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      padding: 15px;
-      background: white;
       display: inline-block;
+      padding: 16px;
+      background: white;
+      border: 1px solid #eee;
       border-radius: 8px;
     }
 
@@ -111,37 +120,46 @@
       font-size: 1.1rem;
       margin: 18px 0;
       font-weight: bold;
-      color: #d42426;
+      color: var(--primary);
+    }
+
+    .debug-text {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: #999;
+      margin-top: 10px;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
 
-  <h1>Photo Check-in</h1>
+  <h1>Event Check-in</h1>
 
   <div class="card">
     <form id="qrForm">
-      <label for="firstName">First Name:</label>
-      <input type="text" id="firstName" name="firstName" required autocomplete="given-name" placeholder="Santa">
+      <label for="firstName">First Name</label>
+      <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
       
-      <label for="lastName">Last Name:</label>
-      <input type="text" id="lastName" name="lastName" required autocomplete="family-name" placeholder="Claus">
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
       
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required autocomplete="email" placeholder="santa@northpole.com">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" required autocomplete="email">
 
       <div class="checkbox-row">
         <input type="checkbox" id="marketingOptIn" checked>
-        <label for="marketingOptIn">Yes, keep me updated about seasonal updates and special offers.</label>
+        <label for="marketingOptIn">I would like to receive my photos and updates about future seasonal events.</label>
       </div>
 
-      <button type="submit">Generate My QR Code</button>
+      <button type="submit">Generate Check-in Code</button>
     </form>
   </div>
 
   <div id="resultSection">
     <div id="qrcode"></div>
-    <p class="instruction">Please show this code to the photographer!</p>
+    <p class="instruction">Show this code to your photographer</p>
+    <div id="debugOut" class="debug-text"></div>
   </div>
 
   <script>
@@ -153,28 +171,36 @@
       const email = document.getElementById("email").value.trim().toLowerCase();
       const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
 
-      /**
-       * SMART DATA STRUCTURE
-       * \u0001 = SOH (Start of Header) - Start sentinel
-       * \u0004 = EOT (End of Transmission) - End sentinel
-
-      const qrData = `\u0001${first}|${last}|${email}|${marketing}\u0004`;
-
-      document.getElementById("qrcode").innerHTML = ""; 
-
-      new QRCode(document.getElementById("qrcode"), {
-        text: qrData,
-        width: 250,
-        height: 250,
-        correctLevel : QRCode.CorrectLevel.M
-      });
-
-      document.getElementById("resultSection").style.display = "block";
+      // Using String.fromCharCode to avoid "Invalid or unexpected token" errors 
+      // caused by invisible characters in the source code.
+      const SOH = String.fromCharCode(1); // Start of Header
+      const EOT = String.fromCharCode(4); // End of Transmission
       
-      // Smooth scroll to the QR code for mobile users
-      setTimeout(() => {
-        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      const qrData = SOH + first + "|" + last + "|" + email + "|" + marketing + EOT;
+
+      // Clear previous QR
+      const qrContainer = document.getElementById("qrcode");
+      qrContainer.innerHTML = ""; 
+
+      try {
+        new QRCode(qrContainer, {
+          text: qrData,
+          width: 250,
+          height: 250,
+          correctLevel : QRCode.CorrectLevel.M
+        });
+
+        document.getElementById("debugOut").innerText = "Data: " + qrData.replace(SOH, '[SOH]').replace(EOT, '[EOT]');
+        document.getElementById("resultSection").style.display = "block";
+        
+        setTimeout(() => {
+          document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
+        }, 100);
+        
+      } catch (err) {
+        alert("Error generating QR code. Please check your input.");
+        console.error(err);
+      }
     });
   </script>
 
