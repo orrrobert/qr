@@ -54,12 +54,6 @@
       border: 1px solid #ddd;
       border-radius: var(--radius);
       box-sizing: border-box;
-      transition: border-color 0.2s;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--primary);
     }
 
     .checkbox-row {
@@ -73,15 +67,7 @@
       width: 22px;
       height: 22px;
       margin-right: 12px;
-      margin-top: 2px;
       flex-shrink: 0;
-    }
-
-    .checkbox-row label {
-      margin: 0;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      font-weight: normal;
     }
 
     button {
@@ -95,10 +81,6 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-    }
-
-    button:hover {
-      background: var(--primary-dark);
     }
 
     #resultSection {
@@ -116,18 +98,33 @@
       border-radius: 8px;
     }
 
-    .instruction {
-      font-size: 1.1rem;
-      margin: 18px 0;
+    .client-preview {
+      font-size: 1.2rem;
       font-weight: bold;
+      margin-top: 15px;
+      color: #333;
+    }
+
+    .email-preview {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .instruction {
+      font-size: 0.9rem;
+      margin-top: 20px;
       color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .debug-text {
       font-family: monospace;
-      font-size: 0.7rem;
-      color: #999;
-      margin-top: 10px;
+      font-size: 0.65rem;
+      color: #ccc;
+      margin-top: 25px;
       word-break: break-all;
     }
   </style>
@@ -149,7 +146,7 @@
 
       <div class="checkbox-row">
         <input type="checkbox" id="marketingOptIn" checked>
-        <label for="marketingOptIn">I would like to receive my photos and updates about future seasonal events.</label>
+        <label for="marketingOptIn">I would like to receive my photos and seasonal event updates.</label>
       </div>
 
       <button type="submit">Generate Check-in Code</button>
@@ -158,7 +155,12 @@
 
   <div id="resultSection">
     <div id="qrcode"></div>
+    
+    <div id="clientDisplay" class="client-preview"></div>
+    <div id="emailDisplay" class="email-preview"></div>
+    
     <p class="instruction">Show this code to your photographer</p>
+    
     <div id="debugOut" class="debug-text"></div>
   </div>
 
@@ -171,14 +173,12 @@
       const email = document.getElementById("email").value.trim().toLowerCase();
       const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
 
-      // Using String.fromCharCode to avoid "Invalid or unexpected token" errors 
-      // caused by invisible characters in the source code.
-      const SOH = String.fromCharCode(1); // Start of Header
-      const EOT = String.fromCharCode(4); // End of Transmission
+      const SOH = String.fromCharCode(1); 
+      const EOT = String.fromCharCode(4); 
       
+      // Data format: SOH + First|Last|Email|Marketing + EOT
       const qrData = SOH + first + "|" + last + "|" + email + "|" + marketing + EOT;
 
-      // Clear previous QR
       const qrContainer = document.getElementById("qrcode");
       qrContainer.innerHTML = ""; 
 
@@ -190,7 +190,13 @@
           correctLevel : QRCode.CorrectLevel.M
         });
 
-        document.getElementById("debugOut").innerText = "Data: " + qrData.replace(SOH, '[SOH]').replace(EOT, '[EOT]');
+        // Update the display text under the QR
+        document.getElementById("clientDisplay").innerText = first + " " + last;
+        document.getElementById("emailDisplay").innerText = email;
+        
+        // Update the hidden debug info
+        document.getElementById("debugOut").innerText = "Raw: " + qrData.replace(SOH, '[SOH]').replace(EOT, '[EOT]');
+        
         document.getElementById("resultSection").style.display = "block";
         
         setTimeout(() => {
@@ -198,7 +204,7 @@
         }, 100);
         
       } catch (err) {
-        alert("Error generating QR code. Please check your input.");
+        alert("Error generating QR code.");
         console.error(err);
       }
     });
