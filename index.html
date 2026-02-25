@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>QR Code Generator</title>
+  <title>Santa Photo QR Generator</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     :root {
-      --primary: #007BFF;
-      --primary-dark: #0056b3;
+      --primary: #d42426; /* Santa Red */
+      --primary-dark: #a31b1d;
       --radius: 12px;
     }
 
@@ -25,6 +25,7 @@
     h1 {
       font-size: 1.6rem;
       margin-bottom: 20px;
+      color: #333;
     }
 
     .card {
@@ -40,6 +41,7 @@
       display: block;
       font-size: 1.1rem;
       margin: 12px 0 6px;
+      text-align: left;
     }
 
     input[type="text"],
@@ -55,18 +57,26 @@
     .checkbox-row {
       display: flex;
       align-items: center;
-      margin-top: 12px;
+      margin-top: 15px;
+      text-align: left;
     }
 
     .checkbox-row input {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .checkbox-row label {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.2;
     }
 
     button {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 25px;
       padding: 18px;
       font-size: 1.2rem;
       border: none;
@@ -84,93 +94,87 @@
     #resultSection {
       margin-top: 30px;
       display: none;
+      padding-bottom: 50px;
     }
 
     #qrcode {
       margin-top: 20px;
       display: flex;
       justify-content: center;
+      padding: 15px;
+      background: white;
+      display: inline-block;
+      border-radius: 8px;
     }
 
-    p {
+    .instruction {
       font-size: 1.1rem;
       margin: 18px 0;
-    }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.4rem;
-      }
-      .card {
-        padding: 16px;
-      }
-      button {
-        padding: 16px;
-        font-size: 1.1rem;
-      }
+      font-weight: bold;
+      color: #d42426;
     }
   </style>
 </head>
 <body>
 
-  <h1>QR Code Generator</h1>
+  <h1>Santa Photo Check-in</h1>
 
   <div class="card">
     <form id="qrForm">
       <label for="firstName">First Name:</label>
-      <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
+      <input type="text" id="firstName" name="firstName" required autocomplete="given-name" placeholder="Santa">
       
       <label for="lastName">Last Name:</label>
-      <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
+      <input type="text" id="lastName" name="lastName" required autocomplete="family-name" placeholder="Claus">
       
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required autocomplete="email">
-
+      <input type="email" id="email" name="email" required autocomplete="email" placeholder="santa@northpole.com">
 
       <div class="checkbox-row">
         <input type="checkbox" id="marketingOptIn" checked>
         <label for="marketingOptIn">Yes, keep me updated about seasonal updates and special offers.</label>
       </div>
 
-      <button type="submit">Generate QR Code</button>
+      <button type="submit">Generate My QR Code</button>
     </form>
   </div>
 
   <div id="resultSection">
     <div id="qrcode"></div>
-    <p>Please show this code to the photographer.</p>
+    <p class="instruction">Please show this code to the photographer!</p>
   </div>
 
   <script>
-    function mungeEmail(email) {
-      email = email.toLowerCase().trim();
-      email = email.split("@").join("2");   // @ → 2
-      email = email.split(".").join("~");   // . → ~
-      return email;
-    }
-
     document.getElementById("qrForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
       const first = document.getElementById("firstName").value.trim();
       const last = document.getElementById("lastName").value.trim();
-      const rawEmail = document.getElementById("email").value.trim();
-      const email = mungeEmail(rawEmail);
-
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
 
-      const qrData = `${first}|${last}|${email}|${marketing}`;
+      /**
+       * SMART DATA STRUCTURE
+       * \u0001 = SOH (Start of Header) - Start sentinel
+       * \u0004 = EOT (End of Transmission) - End sentinel
 
-      document.getElementById("qrcode").innerHTML = ""; // Clear previous QR
+      const qrData = `\u0001${first}|${last}|${email}|${marketing}\u0004`;
+
+      document.getElementById("qrcode").innerHTML = ""; 
 
       new QRCode(document.getElementById("qrcode"), {
         text: qrData,
-        width: 220,
-        height: 220,
+        width: 250,
+        height: 250,
+        correctLevel : QRCode.CorrectLevel.M
       });
 
       document.getElementById("resultSection").style.display = "block";
-      document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
+      
+      // Smooth scroll to the QR code for mobile users
+      setTimeout(() => {
+        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
+      }, 100);
     });
   </script>
 
