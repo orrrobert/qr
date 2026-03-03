@@ -132,9 +132,11 @@
     .debug-text {
       font-family: monospace;
       font-size: 0.65rem;
-      color: #ccc;
+      color: #aaa;
       margin-top: 25px;
       word-break: break-all;
+      background: #eee;
+      padding: 5px;
     }
   </style>
 </head>
@@ -182,12 +184,9 @@
       const email = document.getElementById("email").value.trim().toLowerCase();
       const marketing = document.getElementById("marketingOptIn").checked ? "true" : "false";
 
-      // Control characters for the scanner
-      const SOH = String.fromCharCode(1); 
-      const EOT = String.fromCharCode(4); 
-      
-      // Data format: SOH + First|Last|Email|Marketing + EOT
-      const qrData = SOH + first + "|" + last + "|" + email + "|" + marketing + EOT;
+      // NEW FORMAT: Pipe delimited with Triple-Pipe suffix for the listener
+      // Example: Robert|Orr|robert@gmail.com|true|||
+      const qrData = first + "|" + last + "|" + email + "|" + marketing + "|||";
 
       const qrContainer = document.getElementById("qrcode");
       qrContainer.innerHTML = ""; 
@@ -202,7 +201,9 @@
 
         document.getElementById("clientDisplay").innerText = first + " " + last;
         document.getElementById("emailDisplay").innerText = email;
-        document.getElementById("debugOut").innerText = "Raw: " + qrData.replace(SOH, '[SOH]').replace(EOT, '[EOT]');
+        
+        // Show the exact text being sent to the scanner
+        document.getElementById("debugOut").innerText = "Scan Data: " + qrData;
         
         document.getElementById("resultSection").style.display = "block";
         
